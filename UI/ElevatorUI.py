@@ -1,6 +1,7 @@
 from Logic.Elevator import Elevator
 from Logic.Manager import Manager
 
+
 class ElevatorUI:
     def __init__(self, elevator: Elevator, manager: Manager):
         self.elevator = elevator

@@ -1,4 +1,5 @@
 import time
+import asyncio
 
 from Shunt import Shunt
 from Elevator import Elevator
@@ -27,11 +28,16 @@ class LiftShaft:
         self.position_shunt.append(self.amount_flors)
         self.shunt(Shunt(ShuntType.stop, self.amount_flors))
 
-    def checkShunt(self):
+    async def checkShunt(self):
         if self.elevator.position in self.position_shunt:
+            print("*Лифт коснулся Шунта*")
             self.elevator.TouchShunt(
                 self.shunt[
                     self.position_shunt.index(self.elevator.position)
                           ])
+        else:
+            print("*Лифт НЕ коснулся шунта*")
         time.sleep(0.1)
         self.checkShunt()
+        #await asyncio.sleep(0.1)
+        #await self.checkShunt()

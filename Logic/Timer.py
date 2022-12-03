@@ -1,5 +1,5 @@
 import time
-from Logic.Manager import Manager
+import Manager
 
 
 class Timer:

@@ -1,7 +1,8 @@
-from Enum.Enumator import Way, Door
 from Logic.Manager import Manager
+from Enum.Enumator import Way, Door
 from Logic.Shunt import Shunt
 import time
+
 
 class Elevator:
     def __init__(self, speed: float, way: Way, position: float, door: Door, current_flor: int, ):
