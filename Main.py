@@ -19,7 +19,7 @@ Elv.setManager(Man)
 
 Shaft = LiftShaft(10, Elv)
 
-import threading
+import threading, time
 
 
 
@@ -35,7 +35,7 @@ t_Shaft = threading.Thread(target=startShaftCheck)
 
 t_elevator = threading.Thread(target=startElevator)
 
-t_manager = threading.Thread(target=Man.SelectedFlor, args=(4,))
+t_manager = threading.Thread(target=Man.selectedFlor, args=(4,))
 
 t_Shaft.start()
 
@@ -43,8 +43,21 @@ t_elevator.start()
 
 t_manager.start()
 
+time.sleep(10)
+t_manager1 = threading.Thread(target=Man.selectedFlor, args=(8,))
+t_manager1.start()
 
+time.sleep(2)
+t_manager2 = threading.Thread(target=Man.selectedFlor, args=(5,))
+t_manager2.start()
 
+time.sleep(4)
+t_manager3 = threading.Thread(target=Man.selectedFlor, args=(2,))
+t_manager3.start()
+
+time.sleep(120)
+t_manager4 = threading.Thread(target=Man.selectedFlor, args=(5,))
+t_manager4.start()
 
 
 """

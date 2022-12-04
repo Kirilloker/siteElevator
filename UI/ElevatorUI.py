@@ -7,5 +7,5 @@ class ElevatorUI:
         self.elevator = elevator
         self.manager = manager
 
-    def input_flor(self, selected_flor: int):
+    def inputFlor(self, selected_flor: int):
         self.manager.selectedFlor(selected_flor)

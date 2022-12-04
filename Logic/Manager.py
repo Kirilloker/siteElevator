@@ -15,11 +15,11 @@ class Manager:
         self.list_stops: int = []
         # Этаж на который едем
         self.drive_flor = drive_flor
-        self.timer = Timer(10, self)
-        self.locker = threading.Lock()
+        self.timer = Timer(5, self)
+        self.lockerADD = threading.Lock()
+        self.lockerDELETE = threading.Lock()
 
-    def SelectedFlor(self, selected_flor: int):  # Сделать асинхронным !!!!
-        # Если номер этажа больше максимального количества или меньше нуля завершаем функцию
+    def selectedFlor(self, selected_flor: int):  # Сделать асинхронным !!!!
         if selected_flor > self.amount_flors or selected_flor <= 0:
             print("Такого этажа нет")
             return
@@ -30,81 +30,94 @@ class Manager:
             return
 
         print("Выбран этаж:", selected_flor)
-        # Если движемся вверх и был выбран этаж, который ниже того, куда мы едем
-        # Но при этом выше того, на котором этаже мы сейчас,
-        # То добавляем этаж к которому ехали в очередь, а выбранный этаж
-        # Становится тем, к которму лифт стремится
-        # + та же логика но если движемся вниз
 
-        # Ставим монитор в кретической секции
-        with self.locker:
+        # Ставим монитор в критической секции
+        with self.lockerADD:
+            
             # Если никуда не едем, то просто добавляем элемент в массив
             if self.drive_flor == -1 and selected_flor != self.elevator.current_flor:
+                self.drive_flor = selected_flor
                 self.list_stops.append(selected_flor)
+                print("Добавлен1 этаж: ", selected_flor)
             else:
                 if (self.elevator.way == Way.up and self.drive_flor > selected_flor > self.elevator.current_flor) \
                         or (self.elevator.way == Way.down and self.drive_flor < selected_flor < self.elevator.current_flor):
                     self.list_stops.append(self.drive_flor)
+                    print("Добавлен2 этаж: ", selected_flor)
                     self.drive_flor = selected_flor
                 # Иначе просто добавляем этаж в список
                 else:
                     self.list_stops.append(selected_flor)
+                    print("Добавлен3 этаж: ", selected_flor)
+
+        print("Едем на этаж: ", self.drive_flor)
 
         # Если лифт стоит на месте то начать движение
         if self.elevator.speed == 0:
-            print("Мэнэджэер запускает лифт")
+            #print("Мэнэджэер устанавливает скорость 0.1")
+            #self.elevator.setSpeed(0.1)
             self.stopOnFlor()
-
     def stopOnFlor(self):
-        print("Лифт остановился, выбор следующего пути")
-        # Получаем индекс этажа на который мы приехали
-        index_flor = self.list_stops.index(self.drive_flor)
-        # Сортируем массив по возрастанию
-        self.list_stops.sort()
-
-        # Если мы двигались вверх
-        if self.elevator.way == Way.up:
-            # Если достигли конца массива
-            if index_flor + 1 == len(self.list_stops):
-                # Разворачиваем лифт и вызываем эту же функцию
-                self.elevator.way == Way.down
-                self.stopOnFlor()
+        with self.lockerDELETE:
+            if self.drive_flor not in self.list_stops:
                 return
-            # Иначе выбираем следующий этаж к которому будем ехать выбрав следующий элемент массива
-            # И удаляем тот этаж, на который приехали
-            else:
+
+            print("Лифт остановился, выбор следующего пути")
+            # Сортируем массив по возрастанию
+
+            self.list_stops.sort()
+            # Получаем индекс этажа на который мы приехали
+            index_flor = self.list_stops.index(self.drive_flor)
+
+            print("Очередь этажей: ", self.list_stops)
+            print("Индекс этажа на который приехали:", index_flor)
+
+            if len(self.list_stops) == 1:
+                self.list_stops.pop(0)
+                return
+
+            if self.elevator.way == Way.up and index_flor + 1 == len(self.list_stops):
+                self.elevator.way = Way.down
+
+            if self.elevator.way == Way.down and index_flor == 0:
+                self.elevator.way = Way.up
+
+            if self.elevator.way == Way.up:
                 self.drive_flor = self.list_stops[index_flor + 1]
                 self.list_stops.pop(index_flor)
-        # Та же логика, но с движением лифта вниз
-        else:
-            if index_flor == 1:
-                self.elevator.way == Way.up
-                self.stopOnFlor()
-                return
             else:
                 self.drive_flor = self.list_stops[index_flor - 1]
                 self.list_stops.pop(index_flor)
 
-        print("Мэнэджэер установил скорость лифта 0,2")
-        self.elevator.setSpeed(0.2)  # !!!!!!!!!!!!!!!!!
+            print("Лифт едет на этаж: ", self.drive_flor)
+            print("Список остановок этажей:", self.list_stops)
 
-    def TouchShount(self, shunt: Shunt):
-        # Если дотронулись до шунта, проверяем указывает ли этот
-        # шунт, на этаж на который мы едем, если да, и останавливаем
-        # или замедляем в зависимости от типа шунта
+            print("Мэнэджэер установил скорость лифта 0,1")
+            self.elevator.setSpeed(0.1)  # !!!!!!!!!!!!!!!!!
+
+    def touchShount(self, shunt: Shunt):
+        if shunt.type == ShuntType.stop:
+            self.elevator.current_flor = shunt.flor
+
+        # Если шунт указывает на тот этаж который мы едем
         if self.drive_flor == shunt.flor:
             if shunt.type == ShuntType.stop:
+                print("Лифт коснулся шунта Остановки")
                 self.elevator.setSpeed(0)
+                self.openDoor()
             elif shunt.type == ShuntType.slowing:
+                print("Лифт коснулся шунта замедления")
                 self.elevator.setSpeed(0.05)  # !!!!!!!!!!!!!!!!
 
     def closeDoor(self):
-        # Если дверь открыта - закрываем её
         if self.elevator.door == Door.open:
+            print("Двери закрываются")
             self.elevator.close()
+            self.stopOnFlor()
 
     def openDoor(self):
-        # Если дверь закрыта и скорость лифта = 0, открываем дверь
         if self.elevator.speed == 0 and self.elevator.door == Door.close:
+            print("Двери открываются")
             self.elevator.open()
             self.timer.delayBeforeClose()  # Запустить ассинхронно
+

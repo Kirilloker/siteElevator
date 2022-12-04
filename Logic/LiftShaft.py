@@ -20,24 +20,25 @@ class LiftShaft:
             self.position_shunt.append(i)
             self.shunt.append(Shunt(ShuntType.stop, i))
 
-            self.position_shunt.append(i+0.2)
+            self.position_shunt.append(i+0.3)
             self.shunt.append(Shunt(ShuntType.slowing, i))
 
-            self.position_shunt.append(i+0.8)
-            self.shunt.append(Shunt(ShuntType.slowing, i+0.8))
+            self.position_shunt.append(i+0.7)
+            self.shunt.append(Shunt(ShuntType.slowing, i+1))
 
         self.position_shunt.append(self.amount_flors)
         self.shunt.append(Shunt(ShuntType.stop, self.amount_flors))
 
     def checkShunt(self):
         if self.elevator.getPos() in self.position_shunt:
-            print("*Лифт коснулся Шунта*")
-            self.elevator.TouchShunt(
+            #print("*Лифт коснулся Шунта*")
+            self.elevator.touchShunt(
                 self.shunt[
                     self.position_shunt.index(self.elevator.getPos())
                           ])
         else:
-            print("*Лифт НЕ коснулся шунта*")
+            #print("*Лифт НЕ коснулся шунта*")
+            pass
 
         time.sleep(0.1)
         self.checkShunt()

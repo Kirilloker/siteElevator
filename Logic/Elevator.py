@@ -21,8 +21,8 @@ class Elevator:
     def setManager(self, manager):
         self.manager = manager
 
-    def TouchShunt(self, shunt: Shunt):
-        self.manager.TouchShount(shunt)
+    def touchShunt(self, shunt: Shunt):
+        self.manager.touchShount(shunt)
 
     def setSpeed(self, speed):
         self.speed = speed
@@ -34,7 +34,7 @@ class Elevator:
         self.door = Door.close
 
     def getPos(self):
-        return round(self.position,2)
+        return round(self.position, 2)
 
     def work(self):
         print("Позиция лифта:", self.getPos())
@@ -46,5 +46,5 @@ class Elevator:
             else:
                 self.position -= self.speed
 
-        time.sleep(1) # !!!!!!!!!!!!1
+        time.sleep(0.5) # !!!!!!!!!!!!1
         self.work()
