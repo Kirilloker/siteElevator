@@ -21,10 +21,9 @@ Shaft = LiftShaft(10, Elv)
 
 import threading, time
 
-
-
 def startShaftCheck():
     Shaft.checkShunt()
+
 
 def startElevator():
     Elv.work()

@@ -30,17 +30,15 @@ class LiftShaft:
         self.shunt.append(Shunt(ShuntType.stop, self.amount_flors))
 
     def checkShunt(self):
-        if self.elevator.getPos() in self.position_shunt:
-            #print("*Лифт коснулся Шунта*")
-            self.elevator.touchShunt(
-                self.shunt[
-                    self.position_shunt.index(self.elevator.getPos())
-                          ])
-        else:
-            #print("*Лифт НЕ коснулся шунта*")
-            pass
+        while True:
+            if self.elevator.getPos() in self.position_shunt:
+                #print("*Лифт коснулся Шунта*")
+                self.elevator.touchShunt(
+                    self.shunt[
+                        self.position_shunt.index(self.elevator.getPos())
+                              ])
+            else:
+                #print("*Лифт НЕ коснулся шунта*")
+                pass
 
-        time.sleep(0.1)
-        self.checkShunt()
-        #await asyncio.sleep(0.1)
-        #await self.checkShunt()
+            time.sleep(0.1)

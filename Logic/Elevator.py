@@ -38,7 +38,7 @@ class Elevator:
 
     def work(self):
         print("Позиция лифта:", self.getPos())
-        print("Скорость лифта:", self.speed)
+        #print("Скорость лифта:", self.speed)
         # Запустить изначально асинхронно и крутить бесконечно
         if self.speed != 0:
             if self.way == Way.up:
