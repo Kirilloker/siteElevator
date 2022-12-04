@@ -1,4 +1,3 @@
-# from Logic.Elevator import Elevator
 from Enum.Enumator import Way, Door, ShuntType
 from Logic.Timer import Timer
 from Logic.Shunt import Shunt
@@ -12,7 +11,7 @@ class Manager:
         # Ссылка на лифт
         self.elevator = elevator
         # Список этажей на которых нужно остановится
-        self.list_stops: int = []
+        self.list_stops = []
         # Этаж на который едем
         self.drive_flor = drive_flor
         self.timer = Timer(5, self)
@@ -33,7 +32,6 @@ class Manager:
 
         # Ставим монитор в критической секции
         with self.lockerADD:
-
             # Если никуда не едем, то просто добавляем элемент в массив
             if self.elevator.speed == 0 and selected_flor != self.elevator.current_flor:
                 self.drive_flor = selected_flor
@@ -56,13 +54,12 @@ class Manager:
             self.startMove()
 
     def stopOnFlor(self):
+        # Ставим монитор в критической секции
         with self.lockerDELETE:
             if self.drive_flor not in self.list_stops:
                 return
 
             print("Лифт остановился, выбор следующего этажа")
-
-            print("Список этажей1: ", self.list_stops)
 
             self.list_stops.sort()
 
@@ -73,36 +70,47 @@ class Manager:
                 self.list_stops.pop(0)
                 return
 
+            # Если едем вверх
             if self.elevator.way == Way.up:
+                # Если не доехали до конца массива, то берем следующий элемент
+                # Иначе предыдущий
                 if index_flor + 1 != len(self.list_stops):
                     self.drive_flor = self.list_stops[index_flor + 1]
                 else:
                     self.drive_flor = self.list_stops[index_flor - 1]
+            # Если едем вниз
             else:
+                # Если не достигли нижнего этажа в списке, то берем предыдущий элемент
+                # Иначе берем следующий
                 if index_flor != 0:
                     self.drive_flor = self.list_stops[index_flor - 1]
                 else:
                     self.drive_flor = self.list_stops[index_flor + 1]
 
+            # Удаляем этаж на который приехали
             self.list_stops.pop(index_flor)
 
             print("Лифт едет на этаж: ", self.drive_flor)
-            print("Список этажей2: ", self.list_stops)
             self.startMove()
 
     def touchShount(self, shunt: Shunt):
+        # Когда проезжаем шунт остановки, меняем значения текущего этажа у лифта
         if shunt.type == ShuntType.stop:
             self.elevator.current_flor = shunt.flor
 
         # Если шунт указывает на тот этаж который мы едем
         if self.drive_flor == shunt.flor:
+            # Если это шунт остановки зануляем скорость
+            # Если это шунт замедления, уменьшаем скорость
+
             if shunt.type == ShuntType.stop:
-                #print("Лифт коснулся шунта Остановки")
                 self.elevator.setSpeed(0)
+
+                # Если есть еще куда ехать, то открываем двери
                 if len(self.list_stops) != 0:
                     self.openDoor()
+
             elif shunt.type == ShuntType.slowing:
-                #print("Лифт коснулся шунта замедления")
                 self.elevator.setSpeed(0.05)  # !!!!!!!!!!!!!!!!
 
     def closeDoor(self):

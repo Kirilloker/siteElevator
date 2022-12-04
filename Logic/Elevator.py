@@ -1,4 +1,3 @@
-#from Logic.Manager import Manager
 from Enum.Enumator import Way, Door
 from Logic.Shunt import Shunt
 import time
@@ -15,7 +14,7 @@ class Elevator:
         # Дверь открыта или закрыта
         self.door = door
         # Текущий этаж
-        self.current_flor = current_flor  # ?
+        self.current_flor = current_flor
         self.manager = None
 
     def setManager(self, manager):
@@ -37,14 +36,12 @@ class Elevator:
         return round(self.position, 2)
 
     def work(self):
-        print("Позиция лифта:", self.getPos())
-        #print("Скорость лифта:", self.speed)
-        # Запустить изначально асинхронно и крутить бесконечно
-        if self.speed != 0:
-            if self.way == Way.up:
-                self.position += self.speed
-            else:
-                self.position -= self.speed
+        while True:
+            print("Позиция лифта:", self.getPos())
+            if self.speed != 0:
+                if self.way == Way.up:
+                    self.position += self.speed
+                else:
+                    self.position -= self.speed
 
-        time.sleep(0.5) # !!!!!!!!!!!!1
-        self.work()
+            time.sleep(0.5)
