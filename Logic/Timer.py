@@ -1,9 +1,9 @@
 import time
-import Manager
+#import Manager
 
 
 class Timer:
-    def __init__(self, delay, manager : Manager):
+    def __init__(self, delay, manager):
         self.delay = delay
         self.manager = manager
 

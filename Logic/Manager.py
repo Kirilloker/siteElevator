@@ -1,11 +1,12 @@
-from Logic.Elevator import Elevator
+#from Logic.Elevator import Elevator
 from Enum.Enumator import Way, Door, ShuntType
 from Logic.Timer import Timer
 from Logic.Shunt import Shunt
+import threading
 
 
 class Manager:
-    def __init__(self, elevator: Elevator, amount_flors: int, drive_flor: int):
+    def __init__(self, elevator, amount_flors: int, drive_flor: int):
         # Количество этажей
         self.amount_flors = amount_flors
         # Ссылка на лифт
@@ -15,32 +16,47 @@ class Manager:
         # Этаж на который едем
         self.drive_flor = drive_flor
         self.timer = Timer(10, self)
+        self.locker = threading.Lock()
 
-    def SelectedFlor(self, selected_flor: int):
+    def SelectedFlor(self, selected_flor: int):  # Сделать асинхронным !!!!
         # Если номер этажа больше максимального количества или меньше нуля завершаем функцию
         if selected_flor > self.amount_flors or selected_flor <= 0:
             print("Такого этажа нет")
             return
 
-        # Если выбранный лифт уже есть в списке - ничего не делаем
+        # Если выбранный этаж уже есть в списке - ничего не делаем
         if selected_flor in self.list_stops:
-            print("Такой лифт уже есть в списке")
+            print("Такой этаж уже есть в списке")
             return
 
+        print("Выбран этаж:", selected_flor)
         # Если движемся вверх и был выбран этаж, который ниже того, куда мы едем
         # Но при этом выше того, на котором этаже мы сейчас,
         # То добавляем этаж к которому ехали в очередь, а выбранный этаж
         # Становится тем, к которму лифт стремится
         # + та же логика но если движемся вниз
-        if (self.elevator.way == Way.up and self.drive_flor > selected_flor > self.elevator.current_flor) \
-                or (self.elevator.way == Way.down and self.drive_flor < selected_flor < self.elevator.current_flor):
-            self.list_stops.append(self.drive_flor)
-            self.drive_flor = selected_flor
-        # Иначе просто добавляем этаж в список
-        else:
-            self.list_stops.append(selected_flor)
+
+        # Ставим монитор в кретической секции
+        with self.locker:
+            # Если никуда не едем, то просто добавляем элемент в массив
+            if self.drive_flor == -1 and selected_flor != self.elevator.current_flor:
+                self.list_stops.append(selected_flor)
+            else:
+                if (self.elevator.way == Way.up and self.drive_flor > selected_flor > self.elevator.current_flor) \
+                        or (self.elevator.way == Way.down and self.drive_flor < selected_flor < self.elevator.current_flor):
+                    self.list_stops.append(self.drive_flor)
+                    self.drive_flor = selected_flor
+                # Иначе просто добавляем этаж в список
+                else:
+                    self.list_stops.append(selected_flor)
+
+        # Если лифт стоит на месте то начать движение
+        if self.elevator.speed == 0:
+            print("Мэнэджэер запускает лифт")
+            self.stopOnFlor()
 
     def stopOnFlor(self):
+        print("Лифт остановился, выбор следующего пути")
         # Получаем индекс этажа на который мы приехали
         index_flor = self.list_stops.index(self.drive_flor)
         # Сортируем массив по возрастанию
@@ -48,7 +64,7 @@ class Manager:
 
         # Если мы двигались вверх
         if self.elevator.way == Way.up:
-            # Если достигли придела массива
+            # Если достигли конца массива
             if index_flor + 1 == len(self.list_stops):
                 # Разворачиваем лифт и вызываем эту же функцию
                 self.elevator.way == Way.down
@@ -69,7 +85,8 @@ class Manager:
                 self.drive_flor = self.list_stops[index_flor - 1]
                 self.list_stops.pop(index_flor)
 
-        self.elevator.setSpeed(1)  # !!!!!!!!!!!!!!!!!
+        print("Мэнэджэер установил скорость лифта 0,2")
+        self.elevator.setSpeed(0.2)  # !!!!!!!!!!!!!!!!!
 
     def TouchShount(self, shunt: Shunt):
         # Если дотронулись до шунта, проверяем указывает ли этот
@@ -79,7 +96,7 @@ class Manager:
             if shunt.type == ShuntType.stop:
                 self.elevator.setSpeed(0)
             elif shunt.type == ShuntType.slowing:
-                self.elevator.setSpeed(0.5)  # !!!!!!!!!!!!!!!!
+                self.elevator.setSpeed(0.05)  # !!!!!!!!!!!!!!!!
 
     def closeDoor(self):
         # Если дверь открыта - закрываем её
