@@ -36,4 +36,4 @@ class LiftShaft:
                         self.position_shunt.index(self.elevator.getPos())
                               ])
 
-            time.sleep(0.1)
+            time.sleep(0.5)

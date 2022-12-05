@@ -7,15 +7,18 @@ import time
 
 count_flors = 10
 
+
 Elv = Elevator(speed=0,
                way=Way.up,
                position=1,
                door=Door.close,
-               current_flor=1)
+               current_flor=1,
+               )
 
 Man = Manager(elevator=Elv,
               amount_flors=count_flors,
-              drive_flor=-1)
+              drive_flor=-1,
+              )
 
 Elv.setManager(Man)
 

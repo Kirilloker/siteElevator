@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS posts;
+
+CREATE TABLE posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    _speed TEXT NOT NULL,
+    _floor TEXT NOT NULL,
+	_door  TEXT NOT NULL
+);

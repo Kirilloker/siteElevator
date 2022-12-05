@@ -14,3 +14,10 @@ class Door(enum.Enum):
 class ShuntType(enum.Enum):
     slowing = 1,
     stop = 0
+
+
+class LogType(enum.Enum):
+    Door = "Дверь"
+    Warning = "Предупреждение"
+    SelectFlor = "Выбран этаж"
+    Elevator = "Лифт"
