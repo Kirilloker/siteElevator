@@ -4,11 +4,10 @@ from Logic.Shunt import Shunt
 
 
 class LiftShaft:
-    def __init__(self, amount_flors: int, elevator):
+    def __init__(self, amount_flors: int):
         self.shunt = []
         self.position_shunt = []
         self.amount_flors = amount_flors
-        self.elevator = elevator
         # Создаем шунты
         self.createListShunt()
 
@@ -27,13 +26,12 @@ class LiftShaft:
         self.position_shunt.append(self.amount_flors)
         self.shunt.append(Shunt(ShuntType.stop, self.amount_flors))
 
-    def checkShunt(self):
-        while True:
-            # Когда лифт касается шунта, сообщаем об этом
-            if self.elevator.getPos() in self.position_shunt:
-                self.elevator.touchShunt(
-                    self.shunt[
-                        self.position_shunt.index(self.elevator.getPos())
-                              ])
+    def checkShunt(self, elevator_pos):
 
-            time.sleep(0.5)
+        # Когда лифт касается шунта, сообщаем об этом
+        if elevator_pos in self.position_shunt:
+            return self.shunt[self.position_shunt.index(elevator_pos)]
+
+        return None
+
+

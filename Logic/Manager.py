@@ -29,6 +29,7 @@ class Manager:
             return
 
         self.AddLog(LogType.SelectFlor, "В очередь был добавлен " + str(selected_flor) + " этаж")
+        print("В очередь был добавлен " + str(selected_flor) + " этаж")
 
         # Ставим монитор в критической секции
         with self.lockerADD:
@@ -88,6 +89,7 @@ class Manager:
     def touchShount(self, shunt: Shunt):
         # Когда проезжаем шунт остановки, меняем значения текущего этажа у лифта
         if shunt.type == ShuntType.stop:
+            # print("Debug, " + str(shunt.flor))
             self.elevator.setCurrentFlor(shunt.flor)
 
         # Если шунт указывает на тот этаж который мы едем
@@ -107,14 +109,17 @@ class Manager:
     def closeDoor(self):
         if self.elevator.door == Door.open:
             self.AddLog(LogType.Door, "Двери закрываются")
+            print("Двери закрываются")
 
             self.elevator.close()
             self.stopOnFlor()
 
     def openDoor(self):
-        if self.elevator.speed == 0 and self.elevator.door == Door.close:
+        if self.elevator.speed == 0:
             self.AddLog(LogType.Elevator, "Лифт остановлен на этаже " + str(self.elevator.current_flor))
             self.AddLog(LogType.Door, "Двери открываются")
+            print("Лифт остановлен на этаже " + str(self.elevator.current_flor))
+            print("Двери открываются")
 
             self.elevator.open()
             self.timer.delayBeforeClose()
@@ -126,6 +131,7 @@ class Manager:
             self.elevator.way = Way.down
 
         self.AddLog(LogType.Elevator, "Лифт поехал на этаж: " + str(self.drive_flor))
+        print("Лифт поехал на этаж: " + str(self.drive_flor))
 
         self.elevator.setSpeed(0.1)
 

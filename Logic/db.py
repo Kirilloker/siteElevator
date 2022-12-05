@@ -50,4 +50,5 @@ class DBData:
         self.connection.commit()
 
     def __del__(self):
+
         self.connection.close()

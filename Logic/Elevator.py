@@ -5,7 +5,7 @@ import time
 
 
 class Elevator:
-    def __init__(self, speed: float, way: Way, position: float, door: Door, current_flor: int):
+    def __init__(self, speed: float, way: Way, position: float, door: Door, current_flor: int, lift_shaft):
         # Скорость лифта
         self.speed = speed
         # Направление лифта
@@ -17,15 +17,19 @@ class Elevator:
         # Текущий этаж
         self.current_flor = current_flor
         self.manager = None
+        self.lift_shaft = lift_shaft
 
     def setManager(self, manager):
         self.manager = manager
 
     def setCurrentFlor(self, current_flor):
+        print("Установлен новый этаж", self.current_flor)
         self.current_flor = current_flor
         self.changeDB()
 
     def touchShunt(self, shunt: Shunt):
+        #print("SHUNT: ", shunt.flor)
+        #print("SHUNTyp: ", shunt.type)
         self.manager.touchShount(shunt)
 
     def setSpeed(self, speed):
@@ -46,12 +50,11 @@ class Elevator:
     def changeDB(self):
         str_speed = ""
         if self.speed == 0:
-            str_speed = "0 "
+            str_speed = "0"
         elif self.speed == 0.1:
-            str_speed = "1 "
+            str_speed = "1"
         elif self.speed == 0.05:
-            str_speed = "0.5 "
-        str_speed += " m/s"
+            str_speed = "0.5"
 
         str_floor = str(self.current_flor)
 
@@ -59,6 +62,10 @@ class Elevator:
 
         if self.door == Door.close:
             str_door = "Close"
+
+        # print("speed",str_speed)
+        # print("floor",str_floor)
+        # print("door",str_door)
         dataDB = DBData("databaseData.db", 'dataSQL.sql', True)
         dataDB.Change(str_speed, str_floor, str_door)
 
@@ -71,4 +78,9 @@ class Elevator:
                 else:
                     self.position -= self.speed
 
-            time.sleep(0.5)
+            #print("POS: ", self.getPos())
+            check_shunt = self.lift_shaft.checkShunt(self.getPos())
+            if check_shunt is not None:
+                self.touchShunt(check_shunt)
+
+            time.sleep(0.2)

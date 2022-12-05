@@ -1,18 +1,21 @@
+import sqlite3
+from flask import Flask, render_template, request, make_response
 from Logic.Elevator import Elevator
 from Logic.Manager import Manager
 from Logic.LiftShaft import LiftShaft
 from Enum.Enumator import Way, Door
 import threading
-import time
 
 count_flors = 10
 
+Shaft = LiftShaft(count_flors)
 
 Elv = Elevator(speed=0,
                way=Way.up,
                position=1,
                door=Door.close,
                current_flor=1,
+               lift_shaft=Shaft
                )
 
 Man = Manager(elevator=Elv,
@@ -22,40 +25,61 @@ Man = Manager(elevator=Elv,
 
 Elv.setManager(Man)
 
-Shaft = LiftShaft(count_flors, Elv)
-
-
-def startShaftCheck():
-    Shaft.checkShunt()
-
-
-def startElevator():
-    Elv.work()
-
-
-t_Shaft = threading.Thread(target=startShaftCheck)
-t_elevator = threading.Thread(target=startElevator)
-t_manager = threading.Thread(target=Man.selectedFlor, args=(4,))
-
-t_Shaft.start()
-
+print("Я запускаю поток новый один!")
+t_elevator = threading.Thread(target=Elv.work)
 t_elevator.start()
 
-t_manager.start()
+app = Flask(__name__, template_folder='templates')
 
-time.sleep(10)
-t_manager1 = threading.Thread(target=Man.selectedFlor, args=(8,))
-t_manager1.start()
 
-time.sleep(2)
-t_manager2 = threading.Thread(target=Man.selectedFlor, args=(5,))
-t_manager2.start()
+def get_db_connection():
+    conn = sqlite3.connect('databaseData.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
-time.sleep(4)
-t_manager3 = threading.Thread(target=Man.selectedFlor, args=(2,))
-t_manager3.start()
 
-time.sleep(120)
-t_manager4 = threading.Thread(target=Man.selectedFlor, args=(5,))
-t_manager4.start()
+def get_post(post_id):
+    conn = get_db_connection()
+    post = conn.execute('SELECT * FROM posts WHERE id = ?',
+                        (post_id,)).fetchone()
+    conn.close()
+    return post
+
+@app.route("/")
+def main():
+    return render_template('index.html')
+
+
+@app.route('/info', methods=['GET'])
+def getInfo():
+    y = get_post(1)
+    new_str = str(y[1]) + "/" + str(y[2]) + "/" + str(y[3])
+
+    content = new_str
+    res = make_response(content)
+    res.headers['Content-Type'] = 'text'
+    return res
+
+
+@app.route('/button', methods=['POST'])
+def postInfo():
+    button = request.args.get('button')
+    if button == 'close':
+        Man.closeDoor()
+    elif button == 'open':
+        Man.openDoor()
+    else:
+        print("Выбран этаж: ", button)
+        Man.selectedFlor(int(button))
+
+    res = make_response()
+    return res
+
+import logging
+app.logger.disabled = True
+log = logging.getLogger('werkzeug')
+log.disabled = True
+if __name__ == '__main__':
+    print("Я крыса мыса говно съела")
+    app.run(host='192.168.1.116', port=8200, debug=False, use_reloader=False)
 

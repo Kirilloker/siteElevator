@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<nav class="navbar navbar-expand-md navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('main')}}">Elevator</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </nav>
+
+  <div class="contrainer m-5">
+      <div class="row">
+        <div class="col" style="max-width: 20rem">
+          <h3 class="d-flex justify-content-center">Floors</h3>
+
+          <div class="row">
+            <div class="col d-flex justify-content-end">
+              <button onclick=buttonClick(1) type="button" class="btn btn-outline-dark">1</button>
+            </div>
+            <div class="col">
+              <button onclick=buttonClick(2) type="button" class="btn btn-outline-dark">2</button>
+            </div>
+          </div>
+
+          <br />
+
+          <div class="row">
+            <div class="col d-flex justify-content-end">
+              <button onclick=buttonClick(3) type="button" class="btn btn-outline-dark">3</button>
+            </div>
+            <div class="col">
+              <button onclick=buttonClick(4) type="button" class="btn btn-outline-dark">4</button>
+            </div>
+          </div>
+
+          <br />
+
+          <div class="row">
+            <div class="col d-flex justify-content-end">
+              <button onclick=buttonClick(5) type="button" class="btn btn-outline-dark">5</button>
+            </div>
+            <div class="col">
+              <button onclick=buttonClick(6) type="button" class="btn btn-outline-dark">6</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col" style="max-width: 20rem">
+            <h3 class="d-flex justify-content-center">Elevator</h3>
+
+            <div class="row">
+              <div class="col d-flex justify-content-end">
+                <button onclick=buttonClick(1) type="button" class="btn btn-outline-dark">1</button>
+              </div>
+              <div class="col">
+                <button onclick=buttonClick(2) type="button" class="btn btn-outline-dark">2</button>
+              </div>
+            </div>
+
+            <br />
+
+            <div class="row">
+              <div class="col d-flex justify-content-end">
+                <button onclick=buttonClick(3) type="button" class="btn btn-outline-dark">3</button>
+              </div>
+              <div class="col">
+                <button onclick=buttonClick(4) type="button" class="btn btn-outline-dark">4</button>
+              </div>
+            </div>
+
+            <br />
+
+            <div class="row">
+              <div class="col d-flex justify-content-end">
+                <button onclick=buttonClick(5) type="button" class="btn btn-outline-dark">5</button>
+              </div>
+              <div class="col">
+                <button onclick=buttonClick(6) type="button" class="btn btn-outline-dark">6</button>
+              </div>
+            </div>
+
+            <br />
+
+            <div class="row">
+                <div class="col d-flex justify-content-end">
+                  <button onclick=buttonClick('close') type="button" class="btn btn-outline-dark">-> <-</button>
+                </div>
+                <div class="col">
+                  <button onclick=buttonClick('open') type="button" class="btn btn-outline-dark"><- -></button>
+                </div>
+              </div>
+
+            <br>
+
+      </div>
+
+      <div class="col" style="max-width: 20rem">
+        <h3 class="d-flex justify-content-center">Speed:</h3>
+        <h4 id= speed class="d-flex justify-content-center">0 m/s</h4>
+      </div>
+
+      <div class="col" style="max-width: 20rem">
+        <h3 class="d-flex justify-content-center">CurFloor:</h3>
+        <h4 id= floor class="d-flex justify-content-center">1 floor</h4>
+      </div>
+
+      <div class="col" style="max-width: 20rem">
+        <h3 class="d-flex justify-content-center">Doors:</h3>
+        <h4 id= door class="d-flex justify-content-center">Close</h4>
+      </div>
+
+    </div>
+
+      <script>
+      var floor = document.getElementById("floor");
+      var door = document.getElementById("door");
+      var speed = document.getElementById("speed");
+      setInterval(getInfo, 100);
+
+      function getInfo() {
+        var x = new XMLHttpRequest();
+        x.open("GET", '/info');
+        x.send()
+        x.onload = function (){
+            var data = x.response.split('/');
+            speed.textContent = data[0] + " m/s";
+            floor.textContent = data[1] + " floor";
+            door.textContent = data[2];
+        }
+      }
+      </script>
+      <script>
+    function buttonClick(button){
+        var x = new XMLHttpRequest();
+        x.open("POST", '/button' + '?button='+button);
+        x.send()
+    }
+      </script>
+{% endblock %}
