@@ -1,8 +1,8 @@
 import sqlite3
 from flask import Flask, render_template, request, make_response
-from Logic.Elevator import Elevator
-from Logic.Manager import Manager
-from Logic.LiftShaft import LiftShaft
+from ElevatorProgram.Elevator import Elevator
+from ElevatorProgram.Manager import Manager
+from ElevatorProgram.LiftShaft import LiftShaft
 from Enum.Enumator import Way, Door
 import threading
 import logging

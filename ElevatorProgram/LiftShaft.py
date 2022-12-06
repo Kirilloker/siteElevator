@@ -1,5 +1,5 @@
 from Enum.Enumator import ShuntType
-from Logic.Shunt import Shunt
+from ElevatorProgram.Shunt import Shunt
 
 
 class LiftShaft:

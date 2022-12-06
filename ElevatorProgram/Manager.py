@@ -1,8 +1,8 @@
 from Enum.Enumator import Way, Door, ShuntType, LogType
-from Logic.Timer import Timer
-from Logic.Shunt import Shunt
+from ElevatorProgram.Timer import Timer
+from ElevatorProgram.Shunt import Shunt
 import threading
-from Logic.db import DBLog
+from ElevatorProgram.db import DBLog
 
 
 def AddLog(type_log: LogType, message):

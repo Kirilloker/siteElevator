@@ -1,6 +1,6 @@
 from Enum.Enumator import Way, Door
-from Logic.Shunt import Shunt
-from Logic.db import DBData
+from ElevatorProgram.Shunt import Shunt
+from ElevatorProgram.db import DBData
 import time
 
 
