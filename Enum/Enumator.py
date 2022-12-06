@@ -19,5 +19,5 @@ class ShuntType(enum.Enum):
 class LogType(enum.Enum):
     Door = "Дверь"
     Warning = "Предупреждение"
-    SelectFlor = "Выбран этаж"
+    SelectFloor = "Выбран этаж"
     Elevator = "Лифт"

@@ -5,27 +5,27 @@ from Logic.Manager import Manager
 from Logic.LiftShaft import LiftShaft
 from Enum.Enumator import Way, Door
 import threading
+import logging
 
-count_flors = 10
+count_floors = 10
 
-Shaft = LiftShaft(count_flors)
+Shaft = LiftShaft(count_floors)
 
 Elv = Elevator(speed=0,
                way=Way.up,
                position=1,
-               door=Door.close,
-               current_flor=1,
+               door=Door.open,
+               current_floor=1,
                lift_shaft=Shaft
                )
 
 Man = Manager(elevator=Elv,
-              amount_flors=count_flors,
-              drive_flor=-1,
+              amount_floors=count_floors,
+              drive_floor=-1,
               )
 
 Elv.setManager(Man)
 
-print("Я запускаю поток новый один!")
 t_elevator = threading.Thread(target=Elv.work)
 t_elevator.start()
 
@@ -44,6 +44,7 @@ def get_post(post_id):
                         (post_id,)).fetchone()
     conn.close()
     return post
+
 
 @app.route("/")
 def main():
@@ -70,16 +71,15 @@ def postInfo():
         Man.openDoor()
     else:
         print("Выбран этаж: ", button)
-        Man.selectedFlor(int(button))
+        Man.selectedFloor(int(button))
 
     res = make_response()
     return res
 
-import logging
+
 app.logger.disabled = True
 log = logging.getLogger('werkzeug')
 log.disabled = True
-if __name__ == '__main__':
-    print("Я крыса мыса говно съела")
-    app.run(host='192.168.1.116', port=8200, debug=False, use_reloader=False)
 
+if __name__ == '__main__':
+    app.run(host='192.168.1.116', port=8200, debug=False, use_reloader=False)

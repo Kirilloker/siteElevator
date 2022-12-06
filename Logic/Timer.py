@@ -9,3 +9,4 @@ class Timer:
     def delayBeforeClose(self):
         time.sleep(self.delay)
         self.manager.closeDoor()
+        self.manager.FindNextFloor()

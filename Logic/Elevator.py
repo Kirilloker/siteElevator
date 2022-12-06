@@ -5,7 +5,7 @@ import time
 
 
 class Elevator:
-    def __init__(self, speed: float, way: Way, position: float, door: Door, current_flor: int, lift_shaft):
+    def __init__(self, speed: float, way: Way, position: float, door: Door, current_floor: int, lift_shaft):
         # Скорость лифта
         self.speed = speed
         # Направление лифта
@@ -15,26 +15,28 @@ class Elevator:
         # Дверь открыта или закрыта
         self.door = door
         # Текущий этаж
-        self.current_flor = current_flor
+        self.current_floor = current_floor
         self.manager = None
         self.lift_shaft = lift_shaft
+        self.changeDB()
 
     def setManager(self, manager):
         self.manager = manager
 
-    def setCurrentFlor(self, current_flor):
-        print("Установлен новый этаж", self.current_flor)
-        self.current_flor = current_flor
-        self.changeDB()
+    def setCurrentFloor(self, current_floor):
+        if current_floor != self.current_floor:
+            self.current_floor = current_floor
+            print("Установлен новый этаж", self.current_floor)
+            self.changeDB()
+
 
     def touchShunt(self, shunt: Shunt):
-        #print("SHUNT: ", shunt.flor)
-        #print("SHUNTyp: ", shunt.type)
         self.manager.touchShount(shunt)
 
     def setSpeed(self, speed):
-        self.speed = speed
-        self.changeDB()
+        if self.speed != speed:
+            self.speed = speed
+            self.changeDB()
 
     def open(self):
         self.door = Door.open
@@ -52,17 +54,17 @@ class Elevator:
         if self.speed == 0:
             str_speed = "0"
         elif self.speed == 0.1:
-            str_speed = "1"
+            str_speed = "3"
         elif self.speed == 0.05:
-            str_speed = "0.5"
+            str_speed = "1"
 
-        str_floor = str(self.current_flor)
+        str_floor = str(self.current_floor)
 
         str_door = "Open"
 
         if self.door == Door.close:
             str_door = "Close"
-
+        #
         # print("speed",str_speed)
         # print("floor",str_floor)
         # print("door",str_door)

@@ -4,16 +4,16 @@ from Logic.Shunt import Shunt
 
 
 class LiftShaft:
-    def __init__(self, amount_flors: int):
+    def __init__(self, amount_floors: int):
         self.shunt = []
         self.position_shunt = []
-        self.amount_flors = amount_flors
+        self.amount_floors = amount_floors
         # Создаем шунты
         self.createListShunt()
 
     def createListShunt(self):
         # Расставляем шунты в шахте лифта
-        for i in range(1, self.amount_flors):
+        for i in range(1, self.amount_floors):
             self.position_shunt.append(i)
             self.shunt.append(Shunt(ShuntType.stop, i))
 
@@ -23,8 +23,8 @@ class LiftShaft:
             self.position_shunt.append(i + 0.7)
             self.shunt.append(Shunt(ShuntType.slowing, i + 1))
 
-        self.position_shunt.append(self.amount_flors)
-        self.shunt.append(Shunt(ShuntType.stop, self.amount_flors))
+        self.position_shunt.append(self.amount_floors)
+        self.shunt.append(Shunt(ShuntType.stop, self.amount_floors))
 
     def checkShunt(self, elevator_pos):
 

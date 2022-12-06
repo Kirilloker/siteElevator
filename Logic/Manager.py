@@ -6,94 +6,95 @@ from Logic.db import DBLog
 
 
 class Manager:
-    def __init__(self, elevator, amount_flors: int, drive_flor: int):
+    def __init__(self, elevator, amount_floors: int, drive_floor: int):
         # Количество этажей
-        self.amount_flors = amount_flors
+        self.amount_floors = amount_floors
         # Ссылка на лифт
         self.elevator = elevator
         # Список этажей на которых нужно остановится
         self.list_stops = []
         # Этаж на который едем
-        self.drive_flor = drive_flor
+        self.drive_floor = drive_floor
         self.timer = Timer(5, self)
         self.lockerADD = threading.Lock()
         self.lockerDELETE = threading.Lock()
 
-    def selectedFlor(self, selected_flor: int):  # Сделать асинхронным !!!!
-        if selected_flor > self.amount_flors or selected_flor <= 0:
+    def selectedFloor(self, selected_floor: int):  # Сделать асинхронным !!!!
+        if selected_floor > self.amount_floors or selected_floor <= 0:
             return
 
         # Если выбранный этаж уже есть в списке - ничего не делаем
-        if selected_flor in self.list_stops:
+        if selected_floor in self.list_stops:
             self.AddLog(LogType.Warning, "Был выбран этаж, который уже есть в списке очереди")
             return
 
-        self.AddLog(LogType.SelectFlor, "В очередь был добавлен " + str(selected_flor) + " этаж")
-        print("В очередь был добавлен " + str(selected_flor) + " этаж")
+        if selected_floor == self.elevator.current_floor:
+            return 
+
+        self.AddLog(LogType.SelectFloor, "В очередь был добавлен " + str(selected_floor) + " этаж")
+        print("В очередь был добавлен " + str(selected_floor) + " этаж")
 
         # Ставим монитор в критической секции
         with self.lockerADD:
             # Если никуда не едем, то просто добавляем элемент в массив
-            if self.elevator.speed == 0 and selected_flor != self.elevator.current_flor:
-                self.drive_flor = selected_flor
-                self.list_stops.append(selected_flor)
+            if self.elevator.speed == 0 and selected_floor != self.elevator.current_floor:
+                self.drive_floor = selected_floor
+                print("dr1: ", self.drive_floor)
+                self.list_stops.append(selected_floor)
             else:
-                if (self.elevator.way == Way.up and self.drive_flor > selected_flor > self.elevator.current_flor) \
+                if (self.elevator.way == Way.up and self.drive_floor > selected_floor > self.elevator.current_floor) \
                         or (
-                        self.elevator.way == Way.down and self.drive_flor < selected_flor < self.elevator.current_flor):
-                    self.list_stops.append(self.drive_flor)
-                    self.drive_flor = selected_flor
+                        self.elevator.way == Way.down and self.drive_floor < selected_floor < self.elevator.current_floor):
+                    #self.list_stops.append(self.drive_floor)
+                    self.drive_floor = selected_floor
+                    print("dr2: ", self.drive_floor)
                 else:
-                    self.list_stops.append(selected_flor)
+                    self.list_stops.append(selected_floor)
 
-        if self.elevator.speed == 0:
-            self.startMove()
+        if self.elevator.speed == 0 and len(self.list_stops) == 1 and self.drive_floor in self.list_stops:
+            self.closeDoor()
+            self.FindNextFloor()
 
-    def stopOnFlor(self):
+    def FindNextFloor(self):
         # Ставим монитор в критической секции
         with self.lockerDELETE:
-            if self.drive_flor not in self.list_stops:
+            print("List stops:", self.list_stops)
+            if len(self.list_stops) == 0 or self.list_stops is None:
+                print("test0")
                 return
 
-            self.list_stops.sort()
-
-            # Получаем индекс этажа на который мы приехали
-            index_flor = self.list_stops.index(self.drive_flor)
-
-            if len(self.list_stops) == 1:
-                self.list_stops.pop(0)
-                return
-
+            new_floor = None
             # Если едем вверх
             if self.elevator.way == Way.up:
-                # Если не доехали до конца массива, то берем следующий элемент
-                # Иначе предыдущий
-                if index_flor + 1 != len(self.list_stops):
-                    self.drive_flor = self.list_stops[index_flor + 1]
-                else:
-                    self.drive_flor = self.list_stops[index_flor - 1]
-            # Если едем вниз
+                new_floor = self.GetUp(self.list_stops, self.elevator.current_floor)
+                print("test1")
+                if new_floor is None:
+                    print("test2")
+                    new_floor = self.GetDown(self.list_stops, self.elevator.current_floor)
             else:
-                # Если не достигли нижнего этажа в списке, то берем предыдущий элемент
-                # Иначе берем следующий
-                if index_flor != 0:
-                    self.drive_flor = self.list_stops[index_flor - 1]
-                else:
-                    self.drive_flor = self.list_stops[index_flor + 1]
+                new_floor = self.GetDown(self.list_stops, self.elevator.current_floor)
+                print("test3")
+                if new_floor is None:
+                    print("test4")
+                    new_floor = self.GetUp(self.list_stops, self.elevator.current_floor)
 
-            # Удаляем этаж на который приехали
-            self.list_stops.pop(index_flor)
+            if new_floor is None:
+                print("БЛЯЯЯЯЯЯТЬ ОШИКБАААА")
+            else:
+                print("Новый этаж эта ", new_floor)
+            print("New flor:", new_floor)
+
+            self.drive_floor = new_floor
 
             self.startMove()
 
     def touchShount(self, shunt: Shunt):
         # Когда проезжаем шунт остановки, меняем значения текущего этажа у лифта
         if shunt.type == ShuntType.stop:
-            # print("Debug, " + str(shunt.flor))
-            self.elevator.setCurrentFlor(shunt.flor)
+            self.elevator.setCurrentFloor(shunt.floor)
 
         # Если шунт указывает на тот этаж который мы едем
-        if self.drive_flor == shunt.flor:
+        if self.drive_floor == shunt.floor:
             # Если это шунт остановки зануляем скорость
             # Если это шунт замедления, уменьшаем скорость
 
@@ -112,29 +113,61 @@ class Manager:
             print("Двери закрываются")
 
             self.elevator.close()
-            self.stopOnFlor()
+            # self.FindNextFloor()
 
     def openDoor(self):
         if self.elevator.speed == 0:
-            self.AddLog(LogType.Elevator, "Лифт остановлен на этаже " + str(self.elevator.current_flor))
+            self.AddLog(LogType.Elevator, "Лифт остановлен на этаже " + str(self.elevator.current_floor))
             self.AddLog(LogType.Door, "Двери открываются")
-            print("Лифт остановлен на этаже " + str(self.elevator.current_flor))
+            print("Лифт остановлен на этаже " + str(self.elevator.current_floor))
             print("Двери открываются")
+
+            print("LIST SROPPTS:", self.list_stops)
+            if self.drive_floor in self.list_stops:
+
+                print("из списка был удален:", self.drive_floor)
+                self.list_stops.remove(self.drive_floor)
+                print(self.list_stops)
 
             self.elevator.open()
             self.timer.delayBeforeClose()
 
     def startMove(self):
-        if self.elevator.current_flor < self.drive_flor:
+        if self.elevator.current_floor < self.drive_floor:
             self.elevator.way = Way.up
-        elif self.elevator.current_flor > self.drive_flor:
+            self.AddLog(LogType.Elevator, "Лифт направляется вверх ")
+            print("Лифт направляется вверх ")
+        elif self.elevator.current_floor > self.drive_floor:
             self.elevator.way = Way.down
+            self.AddLog(LogType.Elevator, "Лифт направляется вниз ")
+            print("Лифт направляется вниз ")
 
-        self.AddLog(LogType.Elevator, "Лифт поехал на этаж: " + str(self.drive_flor))
-        print("Лифт поехал на этаж: " + str(self.drive_flor))
+        self.AddLog(LogType.Elevator, "Лифт поехал на этаж: " + str(self.drive_floor))
+        print("Лифт поехал на этаж: " + str(self.drive_floor))
 
         self.elevator.setSpeed(0.1)
 
+
+    def GetUp(self, array, current):
+        array.sort()
+
+        for i in range(len(array)):
+            if array[i] > current:
+                return array[i]
+
+        return None
+
+
+    def GetDown(self, array, current):
+        print(array)
+        array.sort()
+        array.reverse()
+
+        for i in range(len(array)):
+            if array[i] < current:
+                return array[i]
+
+        return None
 
     def AddLog(self, type_log: LogType, message):
         dbLog = DBLog("databaseLog.db", 'LogSQL.sql')
