@@ -1,4 +1,3 @@
-import time
 from Enum.Enumator import ShuntType
 from Logic.Shunt import Shunt
 
@@ -27,11 +26,8 @@ class LiftShaft:
         self.shunt.append(Shunt(ShuntType.stop, self.amount_floors))
 
     def checkShunt(self, elevator_pos):
-
         # Когда лифт касается шунта, сообщаем об этом
         if elevator_pos in self.position_shunt:
             return self.shunt[self.position_shunt.index(elevator_pos)]
 
         return None
-
-

@@ -19,8 +19,8 @@ class DBLog:
 
     def AddNote(self, type_note: LogType, message: str):
         self.cur.execute("INSERT INTO posts (tag, content) VALUES (?, ?)",
-                    (type_note.value, message)
-                    )
+                         (type_note.value, message)
+                         )
         self.connection.commit()
 
     def __del__(self):
@@ -44,11 +44,10 @@ class DBData:
 
     def Change(self, str_speed, str_floor, str_door):
         self.cur.execute("INSERT INTO posts (_speed, _floor, _door) VALUES (?, ?, ?)",
-                   (str_speed, str_floor, str_door)
-                   )
+                         (str_speed, str_floor, str_door)
+                         )
 
         self.connection.commit()
 
     def __del__(self):
-
         self.connection.close()

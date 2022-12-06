@@ -29,9 +29,8 @@ class Elevator:
             print("Установлен новый этаж", self.current_floor)
             self.changeDB()
 
-
     def touchShunt(self, shunt: Shunt):
-        self.manager.touchShount(shunt)
+        self.manager.touchShunt(shunt)
 
     def setSpeed(self, speed):
         if self.speed != speed:
@@ -51,6 +50,7 @@ class Elevator:
 
     def changeDB(self):
         str_speed = ""
+
         if self.speed == 0:
             str_speed = "0"
         elif self.speed == 0.1:
@@ -64,24 +64,20 @@ class Elevator:
 
         if self.door == Door.close:
             str_door = "Close"
-        #
-        # print("speed",str_speed)
-        # print("floor",str_floor)
-        # print("door",str_door)
+
         dataDB = DBData("databaseData.db", 'dataSQL.sql', True)
         dataDB.Change(str_speed, str_floor, str_door)
 
     def work(self):
         while True:
-            # print("Позиция лифта:", self.getPos())
             if self.speed != 0:
                 if self.way == Way.up:
                     self.position += self.speed
                 else:
                     self.position -= self.speed
 
-            #print("POS: ", self.getPos())
             check_shunt = self.lift_shaft.checkShunt(self.getPos())
+
             if check_shunt is not None:
                 self.touchShunt(check_shunt)
 
